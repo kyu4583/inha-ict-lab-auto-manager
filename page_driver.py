@@ -8,6 +8,16 @@ import datetime
 driver = config.Driver.get_instance()
 
 
+def get_driver():
+    return driver
+
+
+def reset_driver():
+    config.Driver.reset_instance()
+    global driver
+    driver = config.Driver.get_instance()
+
+
 def open_url(url):
     driver.get(url)
 

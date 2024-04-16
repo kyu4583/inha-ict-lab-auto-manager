@@ -11,6 +11,11 @@ class Driver:
             Driver._instance = Driver().driver
         return Driver._instance
 
+    @staticmethod
+    def reset_instance():
+        Driver._instance.quit()
+        Driver._instance = Driver().driver
+
     def __init__(self):
         # 드라이버 설치 및 경로 설정
         driver_path = setup_chrome_driver()
