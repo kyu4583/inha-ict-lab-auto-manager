@@ -30,7 +30,7 @@ class TestMyFunction(unittest.TestCase):
     def tearDown(self):
         pd.reset_driver()
 
-    def test_조회일자_선택_테스트(self):
+    def test_현재_조회일자_선택_테스트(self):
         pd.open_portal()
         pd.log_in(os.getenv("PORTAL_ID"), os.getenv("PORTAL_PW"))
         pd.open_ins_from_portal_after_login()
@@ -47,6 +47,24 @@ class TestMyFunction(unittest.TestCase):
 
         # 조회일자가 "2024-04-24"로 선택되어 있는지 확인
         self.assertEqual("2024-04-24", date_value)
+
+    def test_과거_조회일자_선택_테스트(self):
+        pd.open_portal()
+        pd.log_in(os.getenv("PORTAL_ID"), os.getenv("PORTAL_PW"))
+        pd.open_ins_from_portal_after_login()
+        pd.open_lab_manage_from_ins()
+        pd.lab_manage_select_date(24, 3, 2022)
+        pd.lab_manage_select_lab(enums.Lab.L60_808)
+        pd.lab_manage_search()
+
+        # 입력 필드의 값을 검색
+        element = WebDriverWait(pd.get_driver(), 10).until(
+            EC.presence_of_element_located((By.ID, "txtUseDate"))
+        )
+        date_value = element.get_attribute('value')
+
+        # 조회일자가 "2022-03-24"로 선택되어 있는지 확인
+        self.assertEqual("2022-03-24", date_value)
 
     def test_실습실_선택_테스트(self):
         pd.open_portal()
