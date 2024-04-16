@@ -186,6 +186,21 @@ def lab_manage_insert_user_number(num=0):
     send_popup_OK_twice()
 
 
+def lab_manage_insert_lecture_schedule():
+    user_number_select_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ddlUseGubun"))
+    )
+    user_number_select = Select(user_number_select_element)
+    user_number_select.select_by_value("01")
+
+    # 저장 버튼 클릭
+    save_button = driver.find_element(By.NAME, "btnSave")
+    save_button.click()
+
+    # 팝업 확인 * 2번
+    send_popup_OK_twice()
+
+
 def send_popup_OK_twice():
     for i in range(2):
         # 팝업 대기 및 접근
@@ -200,6 +215,13 @@ def lab_manage_select_and_insert_user_number(lab, time, num=0, day=None, month=N
     lab_manage_select_lab(lab)
     lab_manage_select_time(time)
     lab_manage_insert_user_number(num)
+
+
+def lab_manage_select_and_insert_lecture_schedule(lab, time, day=None, month=None, year=None):
+    lab_manage_select_date(day, month, year)
+    lab_manage_select_lab(lab)
+    lab_manage_select_time(time)
+    lab_manage_insert_lecture_schedule()
 
 
 def lab_manage_select_and_delete_record(lab, time, day=None, month=None, year=None):
