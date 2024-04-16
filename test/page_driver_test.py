@@ -76,3 +76,19 @@ class TestMyFunction(unittest.TestCase):
         for lab in enums.Lab:
             pd.lab_manage_select_lab(lab)
             self.assertEqual(lab.value, get_selected_lab_text())
+
+    def test_이용현황_입력_및_기록조회_테스트(self):
+        pd.open_portal()
+        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
+        pd.open_ins_from_portal_after_login()
+        pd.open_lab_manage_from_ins()
+
+        # 더미 데이터 입력
+        pd.lab_manage_select_and_insert_user_number(enums.Lab.L5E_116, 12, 5, 30, 12, 2000)
+
+        # 조회 테스트
+        self.assertEqual(pd.lab_manage_read_use_type_at_time(12).strip(), '')
+        self.assertEqual(pd.lab_manage_read_user_number_at_time(12), 5)
+
+        # 입력한 데이터 삭제
+        pd.lab_manage_select_and_delete_user_number(enums.Lab.L5E_116, 12, 30, 12, 2000)
