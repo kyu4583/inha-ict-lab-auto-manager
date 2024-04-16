@@ -32,7 +32,7 @@ class TestMyFunction(unittest.TestCase):
 
     def test_현재_조회일자_선택_테스트(self):
         pd.open_portal()
-        pd.log_in(os.getenv("PORTAL_ID"), os.getenv("PORTAL_PW"))
+        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
         pd.open_ins_from_portal_after_login()
         pd.open_lab_manage_from_ins()
         pd.lab_manage_select_date(24, 4, 2024)
@@ -50,7 +50,7 @@ class TestMyFunction(unittest.TestCase):
 
     def test_과거_조회일자_선택_테스트(self):
         pd.open_portal()
-        pd.log_in(os.getenv("PORTAL_ID"), os.getenv("PORTAL_PW"))
+        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
         pd.open_ins_from_portal_after_login()
         pd.open_lab_manage_from_ins()
         pd.lab_manage_select_date(24, 3, 2022)
@@ -68,7 +68,7 @@ class TestMyFunction(unittest.TestCase):
 
     def test_실습실_선택_테스트(self):
         pd.open_portal()
-        pd.log_in(os.getenv("PORTAL_ID"), os.getenv("PORTAL_PW"))
+        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
         pd.open_ins_from_portal_after_login()
         pd.open_lab_manage_from_ins()
 
