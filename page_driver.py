@@ -155,3 +155,60 @@ def lab_manage_search():
     # 조회 버튼 클릭
     search_button = driver.find_element(By.ID, "btnSearch")
     search_button.click()
+
+
+def lab_manage_select_time(time):
+    frame_insMain_main_ifTab()
+
+    # 실습실 선택
+    time_select_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ddlTimeList"))
+    )
+    time_select = Select(time_select_element)
+    time_select.select_by_value(str(time))
+
+
+def lab_manage_insert_user_number(num=0):
+    user_number_input = driver.find_element(By.ID, "txtInwon")
+
+    user_number_input.send_keys(num)
+
+    user_number_select_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ddlUseGubun"))
+    )
+    user_number_select = Select(user_number_select_element)
+    user_number_select.select_by_value("0")
+
+    # 저장 버튼 클릭
+    save_button = driver.find_element(By.NAME, "btnSave")
+    save_button.click()
+
+    # 팝업 확인 * 2번
+    send_popup_OK_twice()
+
+
+def send_popup_OK_twice():
+    for i in range(2):
+        # 팝업 대기 및 접근
+        WebDriverWait(driver, 10).until(EC.alert_is_present())
+        # 팝업에 있는 'OK' 버튼 클릭
+        alert = driver.switch_to.alert
+        alert.accept()
+
+def lab_manage_select_and_insert_user_number(lab, time, num=0, day=None, month=None, year=None):
+    lab_manage_select_date(day, month, year)
+    lab_manage_select_lab(lab)
+    lab_manage_select_time(time)
+    lab_manage_insert_user_number(num)
+
+def lab_manage_select_and_delete_user_number(lab, time, day=None, month=None, year=None):
+    lab_manage_select_date(day, month, year)
+    lab_manage_select_lab(lab)
+    lab_manage_select_time(time)
+
+    # 삭제 버튼 클릭
+    delete_button = driver.find_element(By.NAME, "btnDelete")
+    delete_button.click()
+
+    # 팝업 확인 * 2번
+    send_popup_OK_twice()
