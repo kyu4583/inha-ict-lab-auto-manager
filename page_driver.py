@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 import calendar_manager as cm
 import config
 import datetime
@@ -103,7 +104,6 @@ def lab_manage_select_date(day=None, month=None, year=None):
     if day is None:
         day = today.day
 
-    open_lab_manage_from_ins()
     frame_insMain_main_ifTab()
 
     button = WebDriverWait(driver, 10).until(
@@ -119,3 +119,22 @@ def lab_manage_select_date(day=None, month=None, year=None):
             (By.XPATH, f'/html/body/div/table/tbody/tr[{coordinates[day][0]}]/td[{coordinates[day][1]}]/a'))
     )
     button.click()
+
+
+def lab_manage_select_lab(lab):
+    frame_insMain_main_ifTab()
+
+    # 실습실 선택
+    lab_select_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "ddlLabList"))
+    )
+    lab_select = Select(lab_select_element)
+    lab_select.select_by_value(lab.value)
+
+
+def lab_manage_search():
+    frame_insMain_main_ifTab()
+
+    # 조회 버튼 클릭
+    search_button = driver.find_element(By.ID, "btnSearch")
+    search_button.click()
