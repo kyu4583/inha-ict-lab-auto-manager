@@ -114,11 +114,28 @@ def lab_manage_select_date(day=None, month=None, year=None):
     cm.add_monthly_calendar(month, year)
     coordinates = cm.calendar_data[year][month]['coordinates']
 
-    button = WebDriverWait(driver, 10).until(
+    year_select_element = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '/html/body/div/div[1]/div/select[1]')
+        )
+    )
+    year_select = Select(year_select_element)
+    year_select.select_by_value(str(year))
+
+
+    month_select_element = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '/html/body/div/div[1]/div/select[2]')
+        )
+    )
+    month_select = Select(month_select_element)
+    month_select.select_by_value(str(month-1))
+
+    day_button = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable(
             (By.XPATH, f'/html/body/div/table/tbody/tr[{coordinates[day][0]}]/td[{coordinates[day][1]}]/a'))
     )
-    button.click()
+    day_button.click()
 
 
 def lab_manage_select_lab(lab):
