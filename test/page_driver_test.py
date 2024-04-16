@@ -91,4 +91,4 @@ class TestMyFunction(unittest.TestCase):
         self.assertEqual(pd.lab_manage_read_user_number_at_time(12), 5)
 
         # 입력한 데이터 삭제
-        pd.lab_manage_select_and_delete_user_number(enums.Lab.L5E_116, 12, 30, 12, 2000)
+        pd.lab_manage_select_and_delete_record(enums.Lab.L5E_116, 12, 30, 12, 2000)

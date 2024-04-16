@@ -202,7 +202,7 @@ def lab_manage_select_and_insert_user_number(lab, time, num=0, day=None, month=N
     lab_manage_insert_user_number(num)
 
 
-def lab_manage_select_and_delete_user_number(lab, time, day=None, month=None, year=None):
+def lab_manage_select_and_delete_record(lab, time, day=None, month=None, year=None):
     lab_manage_select_date(day, month, year)
     lab_manage_select_lab(lab)
     lab_manage_select_time(time)
