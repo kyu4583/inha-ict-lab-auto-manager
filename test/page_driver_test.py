@@ -107,3 +107,21 @@ class TestMyFunction(unittest.TestCase):
 
         # 입력한 데이터 삭제
         pd.lab_manage_select_and_delete_record(enums.Lab.L5E_116, 13, 30, 12, 2000)
+
+
+    def test_하루기록_전체삭제_테스트(self):
+        pd.open_portal()
+        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
+        pd.open_ins_from_portal_after_login()
+        pd.open_lab_manage_from_ins()
+
+        # 더미 데이터 입력
+        for i in range(1,25):
+            pd.lab_manage_select_and_insert_lecture_schedule(enums.Lab.L60_808, i, 30, 12, 2000)
+
+        # 데이터 삭제
+        pd.lab_manage_select_day_and_delete_all(enums.Lab.L60_808, 30,12,2000)
+
+        # 조회 테스트
+        for i in range(1,25):
+            self.assertEqual(pd.lab_manage_is_record_exist_at_time(i), False)
