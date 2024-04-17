@@ -271,3 +271,8 @@ def lab_manage_read_user_number_at_time(time):
 def lab_manage_read_use_type_at_time(time):
     use_table = lab_manage_read_use_table()
     return use_table[time]['type']
+
+
+def lab_manage_is_record_exist_at_time(time):
+    use_table = lab_manage_read_use_table()
+    return use_table.get(time) is not None
