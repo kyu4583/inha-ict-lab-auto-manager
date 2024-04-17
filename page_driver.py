@@ -261,6 +261,11 @@ def lab_manage_read_use_table():
 
     # 각 행에 대해 반복
     for row in rows:
+        date_cell = row.find_element(By.CSS_SELECTOR, "td")
+        text_in_row = date_cell.text
+        if text_in_row == "조회된 Data가 존재 하지 않습니다":
+            break
+
         date_cell = row.find_element(By.CSS_SELECTOR, "td:nth-child(3)")
         time_in_row = int(date_cell.text)
 
