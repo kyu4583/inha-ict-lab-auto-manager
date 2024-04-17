@@ -25,3 +25,10 @@ class Schedule(Enum):
                'Friday': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
 
     # 필요 시 추가
+
+
+def get(enum_class, name):
+    try:
+        return enum_class[name]
+    except KeyError:
+        return None
