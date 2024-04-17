@@ -1,3 +1,5 @@
+import os
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -27,7 +29,7 @@ def open_portal():
     open_url("https://portal.inha.ac.kr")
 
 
-def log_in(id, pw):
+def log_in(id=os.getenv("INHA_PORTAL_ID"), pw=os.getenv("INHA_PORTAL_PW")):
     # 아이디와 비밀번호 입력 필드 찾기
     user_id_input = driver.find_element(By.ID, "userId")
     password_input = driver.find_element(By.ID, "passwd")
