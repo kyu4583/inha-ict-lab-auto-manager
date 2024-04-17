@@ -226,17 +226,31 @@ def lab_manage_select_and_insert_lecture_schedule(lab, time, day=None, month=Non
     lab_manage_insert_lecture_schedule()
 
 
-def lab_manage_select_and_delete_record(lab, time, day=None, month=None, year=None):
-    lab_manage_select_date(day, month, year)
-    lab_manage_select_lab(lab)
-    lab_manage_select_time(time)
-
+def lab_manage_delete_record():
     # 삭제 버튼 클릭
     delete_button = driver.find_element(By.NAME, "btnDelete")
     delete_button.click()
 
     # 팝업 확인 * 2번
     send_popup_OK_twice()
+
+
+def lab_manage_select_and_delete_record(lab, time, day=None, month=None, year=None):
+    lab_manage_select_date(day, month, year)
+    lab_manage_select_lab(lab)
+    lab_manage_select_time(time)
+
+    lab_manage_delete_record()
+
+
+def lab_manage_select_day_and_delete_all(lab, day=None, month=None, year=None):
+    lab_manage_select_date(day, month, year)
+    lab_manage_select_lab(lab)
+
+    for i in range(1, 25):
+        if lab_manage_is_record_exist_at_time(i):
+            lab_manage_select_time(i)
+            lab_manage_delete_record()
 
 
 def lab_manage_read_use_table():
@@ -267,6 +281,7 @@ def lab_manage_read_use_table():
 def lab_manage_read_user_number_at_time(time):
     use_table = lab_manage_read_use_table()
     return use_table[time]['number']
+
 
 def lab_manage_read_use_type_at_time(time):
     use_table = lab_manage_read_use_table()
