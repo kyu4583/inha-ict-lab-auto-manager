@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab Management</title>
+</head>
+<body>
+    <form method="post">
+        ID: <input type="text" name="ID"><br>
+        PW: <input type="password" name="PW"><br>
+        실습실 선택: <select name="lab">
+            {% for lab in labs %}
+            <option value="{{ lab.name }}">{{ lab.name }}</option>
+            {% endfor %}
+        </select><br>
+        시작 날짜: <input type="text" name="start_date"><br>
+        끝 날짜: <input type="text" name="end_date"><br>
+        예외 날짜: <input type="text" name="except_dates"><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
