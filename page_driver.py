@@ -283,10 +283,10 @@ def lab_manage_read_use_table():
         if date_cell.text == ' ':
             user_number = -1
         else:
-            user_number = int(date_cell.text)
+            user_number = int(date_cell.text.strip())
 
         date_cell = row.find_element(By.CSS_SELECTOR, "td:nth-child(5)")
-        use_type = date_cell.text
+        use_type = date_cell.text.strip()
 
         use_table[time_in_row] = {'type': use_type, 'number': user_number}
 

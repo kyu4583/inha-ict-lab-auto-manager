@@ -16,7 +16,6 @@ class TestMyFunction(unittest.TestCase):
             if schedule is not None and schedule.value.get(today) is not None:
                 pd.lab_manage_select_lab(lab)
                 origin_use_table = pd.lab_manage_read_use_table()
-                #pd.reset_driver()
 
                 #테스트 대상 메소드
                 lm.manage_lab_today(lab)
@@ -30,7 +29,7 @@ class TestMyFunction(unittest.TestCase):
                     if enums.get(enums.Schedule, lab.name).value.get(today)[time - 1] == 1:
                         self.assertEqual(editted_use_table[time]['type'], '수업')
                     else:
-                        self.assertEqual(editted_use_table[time]['type'], '')
+                        self.assertEqual(editted_use_table[time]['type'].strip(), '')
 
                 for time in editted_use_table:
                     pd.lab_manage_select_time(time)
@@ -38,5 +37,3 @@ class TestMyFunction(unittest.TestCase):
 
                 final_use_table = pd.lab_manage_read_use_table()
                 self.assertEqual(origin_use_table, final_use_table)
-
-                #pd.reset_driver()
