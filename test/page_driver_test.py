@@ -31,10 +31,7 @@ class TestMyFunction(unittest.TestCase):
         pd.reset_driver()
 
     def test_현재_조회일자_선택_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
         pd.lab_manage_select_date(24, 4, 2024)
         pd.lab_manage_select_lab(enums.Lab.L60_808)
         pd.lab_manage_search()
@@ -49,10 +46,7 @@ class TestMyFunction(unittest.TestCase):
         self.assertEqual("2024-04-24", date_value)
 
     def test_과거_조회일자_선택_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
         pd.lab_manage_select_date(24, 3, 2022)
         pd.lab_manage_select_lab(enums.Lab.L60_808)
         pd.lab_manage_search()
@@ -67,10 +61,7 @@ class TestMyFunction(unittest.TestCase):
         self.assertEqual("2022-03-24", date_value)
 
     def test_실습실_선택_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
 
         # 모든 실습실에 대해 선택 테스트
         for lab in enums.Lab:
@@ -78,10 +69,7 @@ class TestMyFunction(unittest.TestCase):
             self.assertEqual(lab.value, get_selected_lab_text())
 
     def test_이용현황_입력_및_기록조회_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
 
         # 더미 데이터 입력
         pd.lab_manage_select_and_insert_user_number(enums.Lab.L5E_116, 12, 5, 30, 12, 2000)
@@ -94,10 +82,7 @@ class TestMyFunction(unittest.TestCase):
         pd.lab_manage_select_and_delete_record(enums.Lab.L5E_116, 12, 30, 12, 2000)
 
     def test_수업일정_입력_및_기록조회_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
 
         # 더미 데이터 입력
         pd.lab_manage_select_and_insert_lecture_schedule(enums.Lab.L5E_116, 13, 30, 12, 2000)
@@ -110,10 +95,7 @@ class TestMyFunction(unittest.TestCase):
 
 
     def test_하루기록_전체삭제_테스트(self):
-        pd.open_portal()
-        pd.log_in(os.getenv("INHA_PORTAL_ID"), os.getenv("INHA_PORTAL_PW"))
-        pd.open_ins_from_portal_after_login()
-        pd.open_lab_manage_from_ins()
+        pd.start_and_enter_lab_manage()
 
         # 더미 데이터 입력
         for i in range(1,25):

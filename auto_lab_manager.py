@@ -15,11 +15,10 @@ def manage_lab_at_date(target_date, lab):
     year = target_date.year
 
     day_of_target = target_date.strftime('%A')
+    if enums.Schedule[lab.name].value.get(day_of_target) is None:
+        return 0
 
-    pd.open_portal()
-    pd.log_in()
-    pd.open_ins_from_portal_after_login()
-    pd.open_lab_manage_from_ins()
+    pd.lab_manage_select_date(day, month, year)
     pd.lab_manage_select_lab(lab)
 
     use_table = pd.lab_manage_read_use_table()
@@ -31,3 +30,16 @@ def manage_lab_at_date(target_date, lab):
         elif enums.Schedule[lab.name].value[day_of_target][i - 1] == 1:
             if use_table.get(i) is None:
                 pd.lab_manage_select_and_insert_lecture_schedule(lab, i, day, month, year)
+
+
+def manage_lab_at_range_of_date(lab, start_date, end_date, except_date):
+    if start_date > end_date:
+        while start_date >= end_date:
+            if start_date not in except_date:
+                manage_lab_at_date(start_date, lab)
+            start_date = start_date - datetime.timedelta(days=1)
+    else:
+        while start_date <= end_date:
+            if start_date not in except_date:
+                manage_lab_at_date(start_date, lab)
+            start_date = start_date + datetime.timedelta(days=1)

@@ -45,6 +45,16 @@ def open_ins_from_portal_after_login():
     open_url("https://ins2.inha.ac.kr/ins/")
 
 
+def start_and_enter_lab_manage(id=None, pw=None):
+    open_portal()
+    if id is None:
+        log_in()
+    else:
+        log_in(id, pw)
+    open_ins_from_portal_after_login()
+    open_lab_manage_from_ins()
+
+
 def frame_insMain():
     switch_default_content()
     WebDriverWait(driver, 10).until(
