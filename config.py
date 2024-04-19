@@ -17,8 +17,6 @@ class Driver:
         Driver._instance = Driver().driver
 
     def __init__(self):
-        # Chrome 드라이버 경로 직접 지정 (Docker 컨테이너에서 설정한 경로)
-        driver_path = '/usr/local/bin/chromedriver'
 
         # 크롬 옵션 설정
         chrome_options = webdriver.ChromeOptions()
@@ -30,5 +28,5 @@ class Driver:
         chrome_options.add_argument('window-size=1920x1080')
 
         # 웹 드라이버에 service와 options 값 전달
-        s = Service(driver_path)
+        s = Service()
         self.driver = webdriver.Chrome(service=s, options=chrome_options)

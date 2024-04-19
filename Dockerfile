@@ -1,15 +1,10 @@
 FROM python:latest
 WORKDIR /myapp
 
-# Google Chrome 설치
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-RUN apt-get update && apt-get install -y google-chrome-stable
+RUN apt-get update && apt-get install -y wget unzip
 
-# ChromeDriver 설치
-RUN CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1) && \
-    wget -q --continue -P /chromedriver "http://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip" && \
-    unzip /chromedriver/chromedriver* -d /usr/local/bin/
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt -y install ./google-chrome-stable_current_amd64.deb
 
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
