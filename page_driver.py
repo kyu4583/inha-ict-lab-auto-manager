@@ -30,14 +30,22 @@ def open_portal():
 
 
 def log_in(id=os.getenv("INHA_PORTAL_ID"), pw=os.getenv("INHA_PORTAL_PW")):
-    # 아이디와 비밀번호 입력 필드 찾기
-    user_id_input = driver.find_element(By.ID, "userId")
-    password_input = driver.find_element(By.ID, "passwd")
-    # 아이디와 비밀번호 입력
+    # WebDriverWait를 사용해 요소가 로드될 때까지 대기
+    user_id_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "userId"))
+    )
+    password_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "passwd"))
+    )
+
+    # 아이디, 비번 입력
     user_id_input.send_keys(id)
     password_input.send_keys(pw)
+
     # 로그인 버튼 클릭
-    login_button = driver.find_element(By.XPATH, "//input[@class='ep-btnid']")
+    login_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//input[@class='ep-btnid']"))
+    )
     login_button.click()
 
 
