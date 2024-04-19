@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from chrome_driver_updater import setup_chrome_driver
 
 class Driver:
     _instance = None
@@ -18,8 +17,8 @@ class Driver:
         Driver._instance = Driver().driver
 
     def __init__(self):
-        # 드라이버 설치 및 경로 설정
-        driver_path = setup_chrome_driver()
+        # Chrome 드라이버 경로 직접 지정 (Docker 컨테이너에서 설정한 경로)
+        driver_path = '/usr/local/bin/chromedriver'
 
         # 크롬 옵션 설정
         chrome_options = webdriver.ChromeOptions()
