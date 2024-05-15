@@ -71,6 +71,7 @@ def delete_records():
 
 @app.route('/success')
 def success():
+    pd.log_out()
     return '''
     작업이 성공적으로 완료되었습니다!<br>
     <a href="/"><button>처음으로</button></a>
@@ -78,6 +79,7 @@ def success():
 
 @app.route('/delete_success')
 def delete_success():
+    pd.log_out()
     return '''
     삭제 작업이 성공적으로 완료되었습니다!<br>
     <a href="/"><button>처음으로</button></a>
