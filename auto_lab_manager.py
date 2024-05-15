@@ -32,14 +32,42 @@ def manage_lab_at_date(target_date, lab):
                 pd.lab_manage_select_and_insert_lecture_schedule(lab, i, day, month, year)
 
 
-def manage_lab_at_range_of_date(lab, start_date, end_date, except_date):
+def manage_lab_at_range_of_date(lab, start_date, end_date, except_dates):
     if start_date > end_date:
         while start_date >= end_date:
-            if start_date not in except_date:
+            if start_date not in except_dates:
                 manage_lab_at_date(start_date, lab)
             start_date = start_date - datetime.timedelta(days=1)
     else:
         while start_date <= end_date:
-            if start_date not in except_date:
+            if start_date not in except_dates:
                 manage_lab_at_date(start_date, lab)
+            start_date = start_date + datetime.timedelta(days=1)
+
+
+def delete_lab_at_date(target_date, lab):
+    day = target_date.day
+    month = target_date.month
+    year = target_date.year
+
+    day_of_target = target_date.strftime('%A')
+    if enums.Schedule[lab.name].value.get(day_of_target) is None:
+        return 0
+
+    pd.lab_manage_select_date(day, month, year)
+    pd.lab_manage_select_lab(lab)
+
+    pd.lab_manage_select_day_and_delete_all(lab, day, month, year)
+
+
+def delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates):
+    if start_date > end_date:
+        while start_date >= end_date:
+            if start_date not in except_dates:
+                delete_lab_at_date(start_date, lab)
+            start_date = start_date - datetime.timedelta(days=1)
+    else:
+        while start_date <= end_date:
+            if start_date not in except_dates:
+                delete_lab_at_date(start_date, lab)
             start_date = start_date + datetime.timedelta(days=1)

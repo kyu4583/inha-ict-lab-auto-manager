@@ -49,6 +49,16 @@ def log_in(id=os.getenv("INHA_PORTAL_ID"), pw=os.getenv("INHA_PORTAL_PW")):
     login_button.click()
 
 
+def log_out():
+    open_portal()
+
+    # 로그아웃 버튼 클릭
+    logout_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//*[@id=\"gnb\"]/ul/li[5]/a"))
+    )
+    logout_button.click()
+
+
 def open_ins_from_portal_after_login():
     open_url("https://ins2.inha.ac.kr/ins/")
 
