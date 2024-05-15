@@ -5,7 +5,7 @@ import auto_lab_manager as lm
 import enums
 
 app = Flask(__name__)
-app.secret_key = 'g2sms djEJgrp rkdxladl ehldjTsmsrk'
+app.secret_key = 'g2는_어떻게_강팀이_되었는가'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -40,10 +40,46 @@ def index():
 
     return render_template('index.html', labs=list(enums.Lab))
 
+@app.route('/delete', methods=['POST'])
+def delete_records():
+    ID = request.form['ID']
+    PW = request.form['PW']
+    lab = enums.Lab[request.form['lab']]
+    start_date = parse_date(request.form['start_date'])
+    end_date = parse_date(request.form['end_date'])
+    except_dates_str = request.form['except_dates']
+
+    # 예외 날짜 처리
+    except_dates = []
+    if except_dates_str:
+        except_dates_list = except_dates_str.split(',')
+        except_dates = [parse_date(date.strip()) for date in except_dates_list if date.strip()]
+
+    # 입력값 검증
+    if not start_date or not end_date:
+        flash("Invalid start date or end date.", "error")
+        return redirect(url_for('index'))
+
+    if start_date > end_date:
+        flash("Start date cannot be after end date.", "error")
+        return redirect(url_for('index'))
+
+    # 비즈니스 로직 실행
+    pd.start_and_enter_lab_manage(ID, PW)
+    lm.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
+    return redirect(url_for('delete_success'))
+
 @app.route('/success')
 def success():
     return '''
     작업이 성공적으로 완료되었습니다!<br>
+    <a href="/"><button>처음으로</button></a>
+    '''
+
+@app.route('/delete_success')
+def delete_success():
+    return '''
+    삭제 작업이 성공적으로 완료되었습니다!<br>
     <a href="/"><button>처음으로</button></a>
     '''
 
