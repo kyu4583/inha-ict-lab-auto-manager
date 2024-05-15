@@ -1,10 +1,11 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, flash
 import datetime
 import page_driver as pd
 import auto_lab_manager as lm
 import enums
 
 app = Flask(__name__)
+app.secret_key = 'g2sms djEJgrp rkdxladl ehldjTsmsrk'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -15,10 +16,22 @@ def index():
         lab = enums.Lab[request.form['lab']]
         start_date = parse_date(request.form['start_date'])
         end_date = parse_date(request.form['end_date'])
-        except_dates = request.form['except_dates'].split(',')
+        except_dates_str = request.form['except_dates']
 
-        except_dates = [date.strip() for date in except_dates if date.strip()]
-        except_dates = [parse_date(date) for date in except_dates]
+        # 예외 날짜 처리
+        except_dates = []
+        if except_dates_str:
+            except_dates_list = except_dates_str.split(',')
+            except_dates = [parse_date(date.strip()) for date in except_dates_list if date.strip()]
+
+        # 입력값 검증
+        if not start_date or not end_date:
+            flash("Invalid start date or end date.", "error")
+            return redirect(url_for('index'))
+
+        if start_date > end_date:
+            flash("Start date cannot be after end date.", "error")
+            return redirect(url_for('index'))
 
         # 비즈니스 로직 실행
         pd.start_and_enter_lab_manage(ID, PW)
@@ -38,15 +51,19 @@ def parse_date(date_str):
     today = datetime.datetime.today()
     try:
         # 'yy.mm.dd' 형식
-        if len(date_str.split('.')) == 3:
+        if len(date_str.split('.')) == 3 and len(date_str.split('.')[0]) == 2:
             return datetime.datetime.strptime(date_str, "%y.%m.%d").date()
+        # 'yyyy.mm.dd' 형식
+        elif len(date_str.split('.')) == 3 and len(date_str.split('.')[0]) == 4:
+            return datetime.datetime.strptime(date_str, "%Y.%m.%d").date()
         # 'mm.dd' 형식
         elif len(date_str.split('.')) == 2:
             return datetime.datetime.strptime(f"{today.year}.{date_str}", "%Y.%m.%d").date()
         # 'dd' 형식
-        elif date_str.isdigit():
+        elif date_str.isdigit() and len(date_str) <= 2:
             return datetime.datetime(today.year, today.month, int(date_str)).date()
     except ValueError:
+        print(f"Invalid date format: {date_str}")
         return None
 
 if __name__ == '__main__':
