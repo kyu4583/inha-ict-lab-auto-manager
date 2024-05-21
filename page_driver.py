@@ -1,5 +1,7 @@
 import os
+import time
 
+from selenium.common import UnexpectedAlertPresentException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,8 +22,15 @@ def reset_driver():
     global driver
     driver = config.Driver.get_instance()
 
+def logout_and_reset_driver():
+    try:
+        log_out()
+    except Exception as e:
+        pass
+    reset_driver()
 
 def open_url(url):
+    time.sleep(0.01)
     driver.get(url)
 
 
@@ -53,7 +62,7 @@ def log_out():
     open_portal()
 
     # 로그아웃 버튼 클릭
-    logout_button = WebDriverWait(driver, 10).until(
+    logout_button = WebDriverWait(driver, 2).until(
         EC.element_to_be_clickable((By.XPATH, "//*[@id=\"gnb\"]/ul/li[5]/a"))
     )
     logout_button.click()
@@ -71,6 +80,29 @@ def start_and_enter_lab_manage(id=None, pw=None):
         log_in(id, pw)
     open_ins_from_portal_after_login()
     open_lab_manage_from_ins()
+
+def handle_alert_or_timeout_and_retry(action, max_retries=15):
+    retries = 0
+    while retries < max_retries:
+        try:
+            logout_and_reset_driver()
+            action()
+            return
+        except (UnexpectedAlertPresentException):
+            WebDriverWait(driver, 10).until(EC.alert_is_present())
+            alert = driver.switch_to.alert
+            alert.accept()
+            retries += 1
+        except (TimeoutException):
+            retries += 1
+        except Exception as e:
+            retries += 1
+    raise Exception("Max retries exceeded")
+
+
+def start_and_enter_lab_manage_handling_except(id=None, pw=None):
+    handle_alert_or_timeout_and_retry(lambda: start_and_enter_lab_manage(id, pw))
+
 
 
 def frame_insMain():

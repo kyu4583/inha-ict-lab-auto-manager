@@ -71,5 +71,5 @@ if __name__ == '__main__':
         else:
             break
 
-    pd.start_and_enter_lab_manage(ID, PW)
+    pd.start_and_enter_lab_manage_handling_except(ID, PW)
     lm.manage_lab_at_range_of_date(lab, start_date, end_date, except_date)

@@ -35,14 +35,14 @@ def index():
                 return redirect(url_for('index'))
 
             # 비즈니스 로직 실행
-            pd.start_and_enter_lab_manage(ID, PW)
+            pd.start_and_enter_lab_manage_handling_except(ID, PW)
             lm.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
             return redirect(url_for('success'))
 
         return render_template('index.html', labs=list(enums.Lab))
     except Exception as e:
         print(f"Error: {e}")
-        pd.reset_driver()
+        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 @app.route('/delete', methods=['POST'])
@@ -71,12 +71,12 @@ def delete_records():
             return redirect(url_for('index'))
 
         # 비즈니스 로직 실행
-        pd.start_and_enter_lab_manage(ID, PW)
+        pd.start_and_enter_lab_manage_handling_except(ID, PW)
         lm.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
         return redirect(url_for('delete_success'))
     except Exception as e:
         print(f"Error: {e}")
-        pd.reset_driver()
+        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 @app.route('/success')
