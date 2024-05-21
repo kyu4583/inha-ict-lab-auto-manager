@@ -89,9 +89,6 @@ def handle_alert_or_timeout_and_retry(action, max_retries=15):
             action()
             return
         except (UnexpectedAlertPresentException):
-            WebDriverWait(driver, 10).until(EC.alert_is_present())
-            alert = driver.switch_to.alert
-            alert.accept()
             retries += 1
         except (TimeoutException):
             retries += 1
