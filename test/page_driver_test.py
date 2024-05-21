@@ -26,7 +26,7 @@ def test_현재_조회일자_선택_테스트():
     pd.lab_manage_select_lab(enums.Lab.L60_808)
     pd.lab_manage_search()
 
-    element = pd.WebDriverWait(pd.get_driver(), 10).until(
+    element = pd.WebDriverWait(pd.get_driver(), 4).until(
         pd.EC.presence_of_element_located((pd.By.ID, "txtUseDate"))
     )
     date_value = element.get_attribute('value')
@@ -38,7 +38,7 @@ def test_과거_조회일자_선택_테스트():
     pd.lab_manage_select_lab(enums.Lab.L60_808)
     pd.lab_manage_search()
 
-    element = pd.WebDriverWait(pd.get_driver(), 10).until(
+    element = pd.WebDriverWait(pd.get_driver(), 4).until(
         pd.EC.presence_of_element_located((pd.By.ID, "txtUseDate"))
     )
     date_value = element.get_attribute('value')
@@ -49,7 +49,7 @@ def test_실습실_선택_테스트():
     def get_selected_lab_text():
         pd.frame_insMain_main_ifTab()
 
-        lab_select_element = WebDriverWait(pd.get_driver(), 10).until(
+        lab_select_element = WebDriverWait(pd.get_driver(), 4).until(
             EC.presence_of_element_located((By.ID, "ddlLabList"))
         )
         lab_select = Select(lab_select_element)
