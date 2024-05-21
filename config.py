@@ -33,7 +33,6 @@ class Driver:
         if headless_mode:
             # 무헤드 모드 추가
             chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--no-sandbox")  # sandbox 비활성화
             chrome_options.add_argument("--disable-dev-shm-usage")  # /dev/shm 파티션 사용 안 함
             chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
 
