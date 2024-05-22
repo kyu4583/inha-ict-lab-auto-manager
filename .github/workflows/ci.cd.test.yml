@@ -25,7 +25,7 @@ jobs:
 
       - name: 🔍 Run tests
         run: |
-          pytest
+          pytest -s
 
   deploy:
     if: contains(github.ref_name, 'release/v')

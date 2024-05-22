@@ -24,7 +24,7 @@ jobs:
 
       - name: 🔍 Run tests
         run: |
-          pytest
+          pytest -s
 
   deploy:
     needs: build
