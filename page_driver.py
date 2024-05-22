@@ -10,8 +10,23 @@ from selenium.webdriver.support.ui import Select
 import calendar_manager as cm
 import config
 import datetime
+from dotenv import load_dotenv
 
-driver = config.Driver.get_instance()
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# .env 파일 로드
+load_dotenv()
+
+# 환경 변수에서 ID와 PW 불러오기
+default_portal_id = os.getenv("INHA_PORTAL_ID")
+default_portal_pw = os.getenv("INHA_PORTAL_PW")
+
+# ID와 PW가 제대로 불러와졌는지 확인하고 로그 출력
+if default_portal_id and default_portal_pw:
+    logging.info("Successfully loaded portal ID and password from environment variables.")
+else:
+    logging.warning("Failed to load portal ID or password from environment variables.")
 
 
 def get_driver():
@@ -39,7 +54,7 @@ def open_portal():
     open_url("https://portal.inha.ac.kr")
 
 
-def log_in(id=os.getenv("INHA_PORTAL_ID"), pw=os.getenv("INHA_PORTAL_PW")):
+def log_in(id=default_portal_id, pw=default_portal_pw):
     # WebDriverWait를 사용해 요소가 로드될 때까지 대기
     user_id_input = WebDriverWait(driver, 4).until(
         EC.presence_of_element_located((By.ID, "userId"))
