@@ -1,4 +1,5 @@
 import os
+import logging
 import time
 
 from selenium.common import UnexpectedAlertPresentException, TimeoutException
@@ -88,12 +89,16 @@ def handle_alert_or_timeout_and_retry(action, max_retries=15):
             logout_and_reset_driver()
             action()
             return
-        except (UnexpectedAlertPresentException):
+        except UnexpectedAlertPresentException as e:
+            logging.warning(f"UnexpectedAlertPresentException: {e}. Retrying {retries + 1}/{max_retries}")
             retries += 1
-        except (TimeoutException):
+        except TimeoutException as e:
+            logging.warning(f"TimeoutException: {e}. Retrying {retries + 1}/{max_retries}")
             retries += 1
         except Exception as e:
+            logging.error(f"Exception: {e}. Retrying {retries + 1}/{max_retries}")
             retries += 1
+    logging.error("Max retries exceeded")
     raise Exception("Max retries exceeded")
 
 
