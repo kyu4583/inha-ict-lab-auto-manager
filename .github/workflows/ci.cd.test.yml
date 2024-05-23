@@ -41,6 +41,8 @@ jobs:
     needs: build
     env:
       ENV_PATH: .env
+      S3_BUCKET_DIR_NAME: test
+      DEPLOYMENT_GROUP_NAME: test
     environment: test
     runs-on: ubuntu-latest
     steps:

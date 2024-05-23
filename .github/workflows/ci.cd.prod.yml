@@ -40,8 +40,8 @@ jobs:
     if: github.event.pull_request.merged == true
     env:
       ENV_PATH: .env
-      S3_BUCKET_DIR_NAME: deployments  # S3 버킷 내의 디렉토리 경로
-      DEPLOYMENT_GROUP_NAME: your_codedeploy_deployment_group  # CodeDeploy 배포 그룹 이름
+      S3_BUCKET_DIR_NAME: production
+      DEPLOYMENT_GROUP_NAME: production
     environment: production
     runs-on: ubuntu-latest
     steps:
