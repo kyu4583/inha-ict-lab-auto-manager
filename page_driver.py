@@ -21,9 +21,9 @@ default_portal_pw = os.getenv("INHA_PORTAL_PW")
 
 # ID와 PW가 제대로 불러와졌는지 확인하고 로그 출력
 if default_portal_id and default_portal_pw:
-    logging.info("Successfully loaded portal ID and password from environment variables.")
+    logging.info("Successfully loaded default portal ID and password from environment variables.")
 else:
-    logging.warning("Failed to load portal ID or password from environment variables.")
+    logging.warning("Failed to load default portal ID or password from environment variables.")
 
 
 def get_driver():
