@@ -1,26 +1,25 @@
 version: 0.0
 os: linux
 files:
-    - source: /
-      destination: /home/api/api_back
-    - source: /nginx
-      destination: /home/api/nginx
-    - source: /docker-compose.yml
-      destination: /home/api
-    - source: /.env
-      destination: /home/api
-    - source: /config/
-      destination: /home/api/config
-file_exists_behavior: OVERWRITE
-
-permissions:
-    - object: /home/api
-      pattern: '**'
-      owner: root
-      group: root
+  - source: /
+    destination: /home/kxu45/
+    overwrite: yes
 
 hooks:
-    AfterInstall:
-        - location: scripts/after-deploy.sh
-          timeout: 2000
-          runas: root
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/copy_files.sh
+      timeout: 300
+      runas: kxu45
+
+  ApplicationStart:
+    - location: scripts/start_application.sh
+      timeout: 300
+      runas: kxu45
+  ValidateService:
+    - location: scripts/validate_service.sh
+      timeout: 300
+      runas: kxu45
