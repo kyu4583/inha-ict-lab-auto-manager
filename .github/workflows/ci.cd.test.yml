@@ -69,11 +69,12 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: 🚛 Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://${{ secrets.S3_BUCKET_NAME }}/staging/$GITHUB_SHA.zip
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://${{ secrets.S3_BUCKET_NAME }}/test/$GITHUB_SHA.zip
 
       - name: 🚀 Deploy to EC2 with CodeDeploy
-        run: aws deploy create-deployment
-          --application-name alm-staging
-          --deployment-config-name CodeDeployDefault.AllAtOnce
-          --deployment-group-name staging-deployment-group
-          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=staging/$GITHUB_SHA.zip
+        run: |
+          aws deploy create-deployment
+            --application-name code-deploy
+            --deployment-config-name CodeDeployDefault.AllAtOnce
+            --deployment-group-name test
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=test/$GITHUB_SHA.zip

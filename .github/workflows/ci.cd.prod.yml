@@ -42,7 +42,7 @@ jobs:
     env:
       ENV_PATH: .env
       S3_BUCKET_DIR_NAME: production
-      DEPLOYMENT_GROUP_NAME: production
+      DEPLOYMENT_GROUP_NAME: prod
     environment: production
     runs-on: ubuntu-latest
     steps:
@@ -71,8 +71,8 @@ jobs:
 
       - name: 🚀 Deploy to EC2 with CodeDeploy
         run: |
-          aws deploy create-deployment \
-            --application-name alm-production \
-            --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name production-deployment-group \
+          aws deploy create-deployment
+            --application-name code-deploy
+            --deployment-config-name CodeDeployDefault.AllAtOnce
+            --deployment-group-name prod
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=production/$GITHUB_SHA.zip
