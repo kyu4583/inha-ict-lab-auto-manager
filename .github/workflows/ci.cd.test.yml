@@ -73,8 +73,8 @@ jobs:
 
       - name: 🚀 Deploy to EC2 with CodeDeploy
         run: |
-          aws deploy create-deployment
-            --application-name code-deploy
-            --deployment-config-name CodeDeployDefault.AllAtOnce
-            --deployment-group-name test
+          aws deploy create-deployment \
+            --application-name code-deploy \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --deployment-group-name test \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=test/$GITHUB_SHA.zip
