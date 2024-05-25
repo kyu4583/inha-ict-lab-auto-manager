@@ -33,7 +33,7 @@ jobs:
           echo INHA_PORTAL_PW=${{ secrets.INHA_PORTAL_PW }} >> .env
 
       - name: 🔍 Run tests
-        if: !contains(github.ref_name, 'release')
+        if: "!contains(github.ref_name, 'release')"
         run: |
           pytest
 
