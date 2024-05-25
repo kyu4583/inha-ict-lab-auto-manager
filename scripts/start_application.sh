@@ -10,4 +10,4 @@ docker rm flask_alm || true
 docker run -d --name flask_alm --restart always -p 5000:5000 alm_ser
 
 # 사용되지 않는 Docker 이미지를 정리
-docker image prune -f
+docker system prune -a -f
