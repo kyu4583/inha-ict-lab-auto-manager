@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# .env 파일에서 환경 변수 로드
+if [ -f /home/kxu45/.env ]; then
+  export $(cat /home/kxu45/.env | xargs)
+fi
+
 # 새로운 환경에서 Docker 컨테이너 실행
 cd /home/kxu45/
 docker build -t alm_ser .
