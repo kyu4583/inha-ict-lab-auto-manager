@@ -32,13 +32,9 @@ jobs:
           echo INHA_PORTAL_ID=${{ secrets.INHA_PORTAL_ID }} >> ${{ env.ENV_PATH }}
           echo INHA_PORTAL_PW=${{ secrets.INHA_PORTAL_PW }} >> ${{ env.ENV_PATH }}
 
-      - name: 🔍 Load environment variables
+      - name: 🔍 Run tests
         run: |
           export $(cat ${{ env.ENV_PATH }} | xargs)
-
-      - name: 🔍 Run tests
-        if: "!contains(github.ref_name, 'release')"
-        run: |
           pytest
 
   deploy:
