@@ -1,8 +1,16 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+import logging
 import datetime
+from flask import Flask, request, render_template, redirect, url_for, flash
 import page_driver as pd
 import auto_lab_manager as lm
 import enums
+
+# 로깅 설정
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 app = Flask(__name__)
 app.secret_key = 'g2는_어떻게_강팀이_되었는가'
@@ -34,15 +42,17 @@ def index():
                 flash("Start date cannot be after end date.", "error")
                 return redirect(url_for('index'))
 
+            logging.info(f"Starting lab management: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+
             # 비즈니스 로직 실행
-            pd.start_and_enter_lab_manage(ID, PW)
+            pd.start_and_enter_lab_manage_handling_except(ID, PW)
             lm.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
             return redirect(url_for('success'))
 
         return render_template('index.html', labs=list(enums.Lab))
     except Exception as e:
-        print(f"Error: {e}")
-        pd.reset_driver()
+        logging.error(f"Error in index route: {e}")
+        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 @app.route('/delete', methods=['POST'])
@@ -66,17 +76,15 @@ def delete_records():
             flash("Invalid start date or end date.", "error")
             return redirect(url_for('index'))
 
-        if start_date > end_date:
-            flash("Start date cannot be after end date.", "error")
-            return redirect(url_for('index'))
+        logging.info(f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
 
         # 비즈니스 로직 실행
-        pd.start_and_enter_lab_manage(ID, PW)
+        pd.start_and_enter_lab_manage_handling_except(ID, PW)
         lm.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
         return redirect(url_for('delete_success'))
     except Exception as e:
-        print(f"Error: {e}")
-        pd.reset_driver()
+        logging.error(f"Error in delete_records route: {e}")
+        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 @app.route('/success')
@@ -118,7 +126,7 @@ def parse_date(date_str):
         elif date_str.isdigit() and len(date_str) <= 2:
             return datetime.datetime(today.year, today.month, int(date_str)).date()
     except ValueError:
-        print(f"Invalid date format: {date_str}")
+        logging.error(f"Invalid date format: {date_str}")
         return None
 
 if __name__ == '__main__':

@@ -1,0 +1,78 @@
+name: Deploy workflow on production environment
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+jobs:
+  build:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      ENV_PATH: .env
+    environment: prod
+    steps:
+      - name: ✅ Checkout branch
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ⚙️ Create .env file
+        run: |
+          touch ${{ env.ENV_PATH }}
+          echo INHA_PORTAL_ID=${{ secrets.INHA_PORTAL_ID }} >> ${{ env.ENV_PATH }}
+          echo INHA_PORTAL_PW=${{ secrets.INHA_PORTAL_PW }} >> ${{ env.ENV_PATH }}
+
+      - name: 🔍 Run tests
+        run: |
+          pytest
+
+  deploy:
+    needs: build
+    if: github.event.pull_request.merged == true
+    env:
+      ENV_PATH: .env
+      S3_BUCKET_DIR_NAME: production
+      DEPLOYMENT_GROUP_NAME: prod
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: ✅ Checkout branch
+        uses: actions/checkout@v4
+
+      - name: 🗂️ Make config folder
+        run: mkdir -p config
+
+      - name: ⚙️ Create .env file
+        run: |
+          touch ${{ env.ENV_PATH }}
+
+      - name: 📦 Zip project files
+        run: zip -r ./$GITHUB_SHA.zip .
+
+      - name: 🌎 Access to AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: 🚛 Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://${{ secrets.S3_BUCKET_NAME }}/production/$GITHUB_SHA.zip
+
+      - name: 🚀 Deploy to EC2 with CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name code-deploy \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --deployment-group-name prod \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=production/$GITHUB_SHA.zip
