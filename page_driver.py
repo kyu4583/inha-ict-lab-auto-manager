@@ -10,10 +10,7 @@ from selenium.webdriver.support.ui import Select
 import calendar_manager as cm
 import config
 import datetime
-from dotenv import load_dotenv
 
-# .env 파일 로드
-load_dotenv()
 
 # 환경 변수에서 ID와 PW 불러오기
 default_portal_id = os.getenv("INHA_PORTAL_ID")
