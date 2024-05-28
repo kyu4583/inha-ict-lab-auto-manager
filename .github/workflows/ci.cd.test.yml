@@ -29,8 +29,8 @@ jobs:
       - name: ⚙️ Create .env file
         run: |
           touch ${{ env.ENV_PATH }}
-          echo INHA_PORTAL_ID=${{ secrets.INHA_PORTAL_ID }} >> .env
-          echo INHA_PORTAL_PW=${{ secrets.INHA_PORTAL_PW }} >> .env
+          echo INHA_PORTAL_ID=${{ secrets.INHA_PORTAL_ID }} >> ${{ env.ENV_PATH }}
+          echo INHA_PORTAL_PW=${{ secrets.INHA_PORTAL_PW }} >> ${{ env.ENV_PATH }}
 
       - name: 🔍 Run tests
         if: "!contains(github.ref_name, 'release')"
