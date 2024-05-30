@@ -5,13 +5,6 @@ import page_driver as pd
 import auto_lab_manager as lm
 import enums
 
-# 로깅 설정
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
 app = Flask(__name__)
 app.secret_key = 'g2는_어떻게_강팀이_되었는가'
 

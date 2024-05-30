@@ -6,6 +6,14 @@ from selenium.webdriver.chrome.service import Service
 
 chrome_version_logged = False
 
+# 로깅 설정
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[logging.StreamHandler()]
+)
+
 class Driver:
     _instance = None
 
@@ -58,7 +66,12 @@ class Driver:
         browser_version = self.driver.capabilities['browserVersion']
         # 크롬 드라이버 버전
         driver_version = self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]
+        # 크롬 브라우저 경로
+        browser_path = self.driver.capabilities['chrome']['userDataDir']
+        # 크롬 드라이버 경로
+        driver_path = self.driver.service.path
         logging.info(f"Chrome browser version: {browser_version}, ChromeDriver version: {driver_version}")
+        logging.info(f"Chrome browser path: {browser_path}, ChromeDriver path: {driver_path}")
 
     def __del__(self):
         logging.info(f"Driver instance {self.id} is being destroyed.")  # 소멸 로그
