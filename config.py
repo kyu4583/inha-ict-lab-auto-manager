@@ -48,6 +48,10 @@ class Driver:
             chrome_options.add_argument("--disable-dev-shm-usage")  # /dev/shm 파티션 사용 안 함
             chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
 
+            # Windows 외의 환경에서만 샌드박스 비활성화
+            if os.name != 'nt':
+                chrome_options.add_argument("--no-sandbox")
+
         chrome_options.add_argument('window-size=1920x1080')
 
         # 웹 드라이버에 service와 options 값 전달
