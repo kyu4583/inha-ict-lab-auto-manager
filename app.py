@@ -4,9 +4,10 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 import page_driver as pd
 import auto_lab_manager as lm
 import enums
+import secrets
 
 app = Flask(__name__)
-app.secret_key = 'g2는_어떻게_강팀이_되었는가'
+app.secret_key = secrets.token_hex(16)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
