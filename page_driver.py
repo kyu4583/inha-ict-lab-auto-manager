@@ -158,7 +158,7 @@ def open_lab_manage_from_ins():
     info_comm_link.click()
 
     button = WebDriverWait(driver, 4).until(
-        EC.element_to_be_clickable((By.XPATH, '//*[@id="SideMenu"]/ul/li[11]/ul/li/a'))
+        EC.element_to_be_clickable((By.XPATH, '//*[@id="SideMenu"]/ul/li[12]/ul/li/a'))
     )
     button.click()
 
