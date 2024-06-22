@@ -35,3 +35,12 @@ def test_오늘_모든실습실_자동입력_테스트():
 
             final_use_table = pd.lab_manage_read_use_table()
             assert origin_use_table == final_use_table
+
+def test_하루기록_전체삭제_테스트():
+    for i in range(1, 25):
+        pd.lab_manage_select_and_insert_lecture_schedule(enums.Lab.L60_808, i, 30, 12, 2000)
+
+    lm.delete_lab_at_date(datetime.date(2000, 12, 30), enums.Lab.L60_808)
+
+    for i in range(1, 25):
+        assert not pd.lab_manage_is_record_exist_at_time(i)

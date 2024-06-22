@@ -78,13 +78,3 @@ def test_수업일정_입력_및_기록조회_테스트():
     assert pd.lab_manage_read_use_type_at_time(13).strip() == '수업'
 
     pd.lab_manage_select_and_delete_record(enums.Lab.L5E_116, 13, 30, 12, 2000)
-
-
-def test_하루기록_전체삭제_테스트():
-    for i in range(1, 25):
-        pd.lab_manage_select_and_insert_lecture_schedule(enums.Lab.L60_808, i, 30, 12, 2000)
-
-    pd.lab_manage_select_day_and_delete_all(enums.Lab.L60_808, 30, 12, 2000)
-
-    for i in range(1, 25):
-        assert not pd.lab_manage_is_record_exist_at_time(i)
