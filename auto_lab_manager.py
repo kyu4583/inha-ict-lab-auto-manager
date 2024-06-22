@@ -60,11 +60,6 @@ def delete_lab_at_date(target_date, lab):
     month = target_date.month
     year = target_date.year
 
-    day_of_target = target_date.strftime('%A')
-    if enums.Schedule[lab.name].value.get(day_of_target) is None:
-        feedback_logger.info("기록이 이미 비어있습니다.")
-        return 0
-
     pd.lab_manage_select_date(day, month, year)
     pd.lab_manage_select_lab(lab)
     for i in range(1, 25):
