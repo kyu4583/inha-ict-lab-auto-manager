@@ -4,10 +4,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_socketio import SocketIO
 import logging_config
 import threading
-import page_driver as pd
-import auto_lab_manager as lm
 import enums
 import secrets
+from page_driver_pool import page_driver_pool
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
@@ -52,22 +51,29 @@ def index():
     except Exception as e:
         feedback_logger = logging.getLogger('feedback_logger')
         feedback_logger.error(f"Error in index route: {e}")
-        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 def enter_lab_records(ID, PW, lab, start_date, end_date, except_dates):
     feedback_logger = logging.getLogger('feedback_logger')
     try:
-        pd.start_and_enter_lab_manage_handling_except(ID, PW)
-        lm.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
-        pd.log_out()
+        driver_id = page_driver_pool.create_driver()
+        if driver_id is None:
+            raise Exception("Failed to create a new driver.")
+
+        page_driver = page_driver_pool.get_driver(driver_id)
+        page_driver.start_and_enter_lab_manage_handling_except(ID, PW)
+        page_driver.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
+        page_driver.log_out()
+
         with app.app_context():
             socketio.emit('task_complete', {'status': 'success'})
     except Exception as e:
         feedback_logger.error(f"Error in enter_lab_records: {e}")
-        pd.logout_and_reset_driver()
         with app.app_context():
             socketio.emit('task_complete', {'status': 'error'})
+    finally:
+        if driver_id is not None:
+            page_driver_pool.remove_driver(driver_id)
 
 @app.route('/in_progress')
 def in_progress():
@@ -99,21 +105,26 @@ def delete_records():
 
         return redirect(url_for('in_progress'))
     except Exception as e:
+        feedback_logger = logging.getLogger('feedback_logger')
         feedback_logger.error(f"Error in delete_records route: {e}")
-        pd.logout_and_reset_driver()
         return redirect(url_for('error'))
 
 def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates):
     feedback_logger = logging.getLogger('feedback_logger')
     try:
-        pd.start_and_enter_lab_manage_handling_except(ID, PW)
-        lm.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
-        pd.log_out()
+        driver_id = page_driver_pool.create_driver()
+        if driver_id is None:
+            raise Exception("Failed to create a new driver.")
+
+        page_driver = page_driver_pool.get_driver(driver_id)
+        page_driver.start_and_enter_lab_manage_handling_except(ID, PW)
+        page_driver.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
+        page_driver.log_out()
+
         with app.app_context():
             socketio.emit('task_complete', {'status': 'success'})
     except Exception as e:
         feedback_logger.error(f"Error in delete_lab_records: {e}")
-        pd.logout_and_reset_driver()
         with app.app_context():
             socketio.emit('task_complete', {'status': 'error'})
 

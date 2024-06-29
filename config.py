@@ -1,76 +1,65 @@
 import logging
 import os
-import uuid  # UUID 모듈 추가
+import uuid
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-
-chrome_version_logged = False
 
 feedback_logger = logging.getLogger('feedback_logger')
 console_logger = logging.getLogger('console_logger')
 
-class Driver:
-    _instance = None
+chrome_version_logged = False
 
-    @staticmethod
-    def get_instance():
-        if Driver._instance is None:
-            Driver._instance = Driver().driver
-        return Driver._instance
+def get_default_portal_id():
+    return os.getenv("INHA_PORTAL_ID")
 
-    @staticmethod
-    def reset_instance():
-        if Driver._instance:
-            console_logger.debug(f"Driver instance {Driver._instance.id} is being reset.")  # 소멸 로그
-            Driver._instance.quit()
-        Driver._instance = Driver().driver
+def get_default_portal_pw():
+    return os.getenv("INHA_PORTAL_PW")
 
+def get_max_web_drivers():
+    return int(os.getenv('MAX_WEB_DRIVERS', '5'))
 
-    def __init__(self):
-        # 고유 ID 생성
-        self.id = uuid.uuid4()
-        console_logger.debug(f"Driver instance {self.id} is being created.")  # 생성 로그
+if get_default_portal_id() and get_default_portal_pw():
+    console_logger.info("Successfully loaded default portal ID and password from environment variables.")
+else:
+    console_logger.warning("Failed to load default portal ID or password from environment variables.")
 
-        # 크롬 옵션 설정
-        chrome_options = webdriver.ChromeOptions()
+def create_web_driver():
+    # 고유 ID 생성
+    driver_id = uuid.uuid4()
+    console_logger.debug(f"WebDriver instance {driver_id} is being created.")
 
-        # 환경 변수 읽기
-        headless_mode = os.getenv('HEADLESS_MODE', 'True') == 'True'
+    # 크롬 옵션 설정
+    chrome_options = webdriver.ChromeOptions()
+    headless_mode = os.getenv('HEADLESS_MODE', 'True') == 'True'
+    if headless_mode:
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+    if os.name != 'nt':
+        chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument('window-size=1920x1080')
 
-        if headless_mode:
-            # 무헤드 모드 추가
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--disable-dev-shm-usage")  # /dev/shm 파티션 사용 안 함
-            chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
+    # 웹 드라이버 생성
+    s = Service()
+    driver = webdriver.Chrome(service=s, options=chrome_options)
+    driver.id = driver_id
 
-            # Windows 외의 환경에서만 샌드박스 비활성화
-            if os.name != 'nt':
-                chrome_options.add_argument("--no-sandbox")
+    # 크롬 버전 및 크롬 드라이버 버전 로그 출력 (최초 1회만)
+    global chrome_version_logged
+    if not chrome_version_logged:
+        log_version_info(driver)
+        chrome_version_logged = True
 
-        chrome_options.add_argument('window-size=1920x1080')
+    return driver
 
-        # 웹 드라이버에 service와 options 값 전달
-        s = Service()
-        self.driver = webdriver.Chrome(service=s, options=chrome_options)
-        self.driver.id = self.id  # 드라이버에 ID 할당
+def log_version_info(driver):
+    browser_version = driver.capabilities['browserVersion']
+    driver_version = driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]
+    browser_path = driver.capabilities['chrome']['userDataDir']
+    driver_path = driver.service.path
+    console_logger.info(f"Chrome browser version: {browser_version}, ChromeDriver version: {driver_version}")
+    console_logger.info(f"Chrome browser path: {browser_path}, ChromeDriver path: {driver_path}")
 
-        # 크롬 버전 및 크롬 드라이버 버전 로그 출력 (최초 1회만)
-        global chrome_version_logged
-        if not chrome_version_logged:
-            self.log_version_info()
-            chrome_version_logged = True
-
-    def log_version_info(self):
-        # 크롬 브라우저 버전
-        browser_version = self.driver.capabilities['browserVersion']
-        # 크롬 드라이버 버전
-        driver_version = self.driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]
-        # 크롬 브라우저 경로
-        browser_path = self.driver.capabilities['chrome']['userDataDir']
-        # 크롬 드라이버 경로
-        driver_path = self.driver.service.path
-        console_logger.info(f"Chrome browser version: {browser_version}, ChromeDriver version: {driver_version}")
-        console_logger.info(f"Chrome browser path: {browser_path}, ChromeDriver path: {driver_path}")
-
-    def __del__(self):
-        console_logger.debug(f"Driver instance {self.id} is being destroyed.")  # 소멸 로그
+def quit_web_driver(driver):
+    console_logger.debug(f"WebDriver instance {driver.id} is being destroyed.")
+    driver.quit()
