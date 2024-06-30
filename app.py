@@ -1,5 +1,7 @@
 import logging
 import datetime
+import uuid
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_socketio import SocketIO
 import logging_config
@@ -16,8 +18,12 @@ socketio = SocketIO(app)
 logging_config.setup_logging()
 logging_config.setup_socket_logging(socketio)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if 'user_id' not in session:
+        session['user_id'] = str(uuid.uuid4())
+    user_id = session['user_id']
     try:
         if request.method == 'POST':
             ID = request.form['ID']
@@ -40,10 +46,8 @@ def index():
                 flash("Start date cannot be after end date.", "error")
                 return redirect(url_for('index'))
 
-            feedback_logger = logging.getLogger('feedback_logger')
-            feedback_logger.info(f"Starting lab record entry: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
-
-            threading.Thread(target=enter_lab_records, args=(ID, PW, lab, start_date, end_date, except_dates)).start()
+            threading.Thread(target=enter_lab_records,
+                             args=(ID, PW, lab, start_date, end_date, except_dates, user_id)).start()
 
             return redirect(url_for('in_progress'))
 
@@ -53,10 +57,14 @@ def index():
         feedback_logger.error(f"Error in index route: {e}")
         return redirect(url_for('error'))
 
-def enter_lab_records(ID, PW, lab, start_date, end_date, except_dates):
+
+def enter_lab_records(ID, PW, lab, start_date, end_date, except_dates, user_id):
     feedback_logger = logging.getLogger('feedback_logger')
+    feedback_logger = logging.LoggerAdapter(feedback_logger, {'user_id': user_id})
     try:
-        driver_id = page_driver_pool.create_driver()
+        feedback_logger.info(
+            f"Starting lab record entry: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+        driver_id = page_driver_pool.create_driver(user_id)
         if driver_id is None:
             raise Exception("Failed to create a new driver.")
 
@@ -66,21 +74,28 @@ def enter_lab_records(ID, PW, lab, start_date, end_date, except_dates):
         page_driver.log_out()
 
         with app.app_context():
-            socketio.emit('task_complete', {'status': 'success'})
+            socketio.emit('task_complete', {'status': 'success', 'user_id': user_id})
     except Exception as e:
         feedback_logger.error(f"Error in enter_lab_records: {e}")
         with app.app_context():
-            socketio.emit('task_complete', {'status': 'error'})
+            socketio.emit('task_complete', {'status': 'error', 'user_id': user_id})
     finally:
         if driver_id is not None:
             page_driver_pool.remove_driver(driver_id)
 
+
 @app.route('/in_progress')
 def in_progress():
-    return render_template('in_progress.html')
+    # console_logger = logging.getLogger('console_logger')
+    # console_logger.error(f"userid = {session['user_id']}")
+    return render_template('in_progress.html', user_id=session['user_id'])
+
 
 @app.route('/delete', methods=['POST'])
 def delete_records():
+    if 'user_id' not in session:
+        session['user_id'] = str(uuid.uuid4())
+    user_id = session['user_id']
     try:
         ID = request.form['ID']
         PW = request.form['PW']
@@ -98,10 +113,8 @@ def delete_records():
             flash("Invalid start date or end date.", "error")
             return redirect(url_for('index'))
 
-        feedback_logger = logging.getLogger('feedback_logger')
-        feedback_logger.info(f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
-
-        threading.Thread(target=delete_lab_records, args=(ID, PW, lab, start_date, end_date, except_dates)).start()
+        threading.Thread(target=delete_lab_records,
+                         args=(ID, PW, lab, start_date, end_date, except_dates, user_id)).start()
 
         return redirect(url_for('in_progress'))
     except Exception as e:
@@ -109,9 +122,13 @@ def delete_records():
         feedback_logger.error(f"Error in delete_records route: {e}")
         return redirect(url_for('error'))
 
-def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates):
+
+def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates, user_id):
     feedback_logger = logging.getLogger('feedback_logger')
+    feedback_logger = logging.LoggerAdapter(feedback_logger, {'user_id': user_id})
     try:
+        feedback_logger.info(
+            f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
         driver_id = page_driver_pool.create_driver()
         if driver_id is None:
             raise Exception("Failed to create a new driver.")
@@ -122,11 +139,14 @@ def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates):
         page_driver.log_out()
 
         with app.app_context():
-            socketio.emit('task_complete', {'status': 'success'})
+            socketio.emit('task_complete', {'status': 'success', 'user_id': user_id})
     except Exception as e:
         feedback_logger.error(f"Error in delete_lab_records: {e}")
         with app.app_context():
-            socketio.emit('task_complete', {'status': 'error'})
+            socketio.emit('task_complete', {'status': 'error', 'user_id': user_id})
+    finally:
+        if driver_id is not None:
+            page_driver_pool.remove_driver(driver_id)
 
 
 def parse_date(date_str):
@@ -148,6 +168,7 @@ def parse_date(date_str):
         console_logger = logging.getLogger('console_logger')
         console_logger.error(f"Invalid date format: {date_str}")
         return None
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

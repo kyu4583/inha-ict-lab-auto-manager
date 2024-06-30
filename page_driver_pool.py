@@ -15,12 +15,15 @@ class PageDriverPool:
             cls._instance.max_drivers = config.get_max_web_drivers()
         return cls._instance
 
-    def create_driver(self):
+    def create_driver(self, user_id=None):
         if len(self.page_drivers) >= self.max_drivers:
             console_logger.warning("Maximum number of WebDrivers reached. Cannot create new driver.")
             return None
 
-        driver = PageDriver()
+        if (user_id):
+            driver = PageDriver(user_id)
+        else:
+            driver = PageDriver()
         self.page_drivers[driver.id] = driver
         console_logger.info(f"Created new PageDriver with id {driver.id}")
         return driver.id

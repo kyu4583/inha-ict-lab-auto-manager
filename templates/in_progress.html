@@ -23,22 +23,28 @@
 </div>
 
 <script>
+    var userIdFromSession = "{{ user_id }}";
+
     $(document).ready(function() {
         var socket = io();
 
         socket.on('log_message', function(data) {
-            $('#log').append('<p>' + data.message + '</p>');
-            $('#log').scrollTop($('#log')[0].scrollHeight);
+            if (data.user_id === userIdFromSession) {
+                $('#log').append('<p>' + data.message + '</p>');
+                $('#log').scrollTop($('#log')[0].scrollHeight);
+            }
         });
 
         socket.on('task_complete', function(data) {
-            var completionMessage = $('#completion-message');
-            if (data.status === 'success') {
-                completionMessage.find('h2').text('작업이 성공적으로 완료되었습니다!');
-            } else {
-                completionMessage.find('h2').text('작업 중 오류가 발생했습니다.');
+            if (data.user_id === userIdFromSession) {
+                var completionMessage = $('#completion-message');
+                if (data.status === 'success') {
+                    completionMessage.find('h2').text('작업이 성공적으로 완료되었습니다!');
+                } else {
+                    completionMessage.find('h2').text('작업 중 오류가 발생했습니다.');
+                }
+                completionMessage.show();
             }
-            completionMessage.show();
         });
     });
 </script>

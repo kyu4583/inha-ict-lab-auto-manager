@@ -9,7 +9,7 @@ class SocketIOHandler(logging.Handler):
 
     def emit(self, record):
         log_entry = self.format(record)
-        self.socketio.emit('log_message', {'message': log_entry})
+        self.socketio.emit('log_message', {'message': log_entry, 'user_id': getattr(record, 'user_id', None)})
 
 
 def setup_logging():
@@ -44,7 +44,7 @@ def setup_logging():
 
 def setup_socket_logging(socketio):
     # 포매터 설정
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s')
 
     # 웹소켓 핸들러 설정
     socketio_handler = SocketIOHandler(socketio)
