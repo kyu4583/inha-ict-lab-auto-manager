@@ -1,19 +1,31 @@
 import logging
 import datetime
-from flask import Flask, request, render_template, redirect, url_for, flash
-import page_driver as pd
-import auto_lab_manager as lm
+import uuid
+
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_socketio import SocketIO
+import logging_config
+import threading
 import enums
 import secrets
+from page_driver_pool import page_driver_pool
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
+socketio = SocketIO(app)
+
+# 로깅 설정
+logging_config.setup_logging()
+logging_config.setup_socket_logging(socketio)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if 'user_id' not in session:
+        session['user_id'] = str(uuid.uuid4())
+    user_id = session['user_id']
     try:
         if request.method == 'POST':
-            # 폼에서 입력값 처리
             ID = request.form['ID']
             PW = request.form['PW']
             lab = enums.Lab[request.form['lab']]
@@ -21,13 +33,11 @@ def index():
             end_date = parse_date(request.form['end_date'])
             except_dates_str = request.form['except_dates']
 
-            # 예외 날짜 처리
             except_dates = []
             if except_dates_str:
                 except_dates_list = except_dates_str.split(',')
                 except_dates = [parse_date(date.strip()) for date in except_dates_list if date.strip()]
 
-            # 입력값 검증
             if not start_date or not end_date:
                 flash("Invalid start date or end date.", "error")
                 return redirect(url_for('index'))
@@ -36,21 +46,56 @@ def index():
                 flash("Start date cannot be after end date.", "error")
                 return redirect(url_for('index'))
 
-            logging.info(f"Starting lab management: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+            threading.Thread(target=enter_lab_records,
+                             args=(ID, PW, lab, start_date, end_date, except_dates, user_id)).start()
 
-            # 비즈니스 로직 실행
-            pd.start_and_enter_lab_manage_handling_except(ID, PW)
-            lm.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
-            return redirect(url_for('success'))
+            return redirect(url_for('in_progress'))
 
         return render_template('index.html', labs=list(enums.Lab))
     except Exception as e:
-        logging.error(f"Error in index route: {e}")
-        pd.logout_and_reset_driver()
+        feedback_logger = logging.getLogger('feedback_logger')
+        feedback_logger.error(f"Error in index route: {e}")
         return redirect(url_for('error'))
+
+
+def enter_lab_records(ID, PW, lab, start_date, end_date, except_dates, user_id):
+    feedback_logger = logging.getLogger('feedback_logger')
+    feedback_logger = logging.LoggerAdapter(feedback_logger, {'user_id': user_id})
+    try:
+        feedback_logger.info(
+            f"Starting lab record entry: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+        driver_id = page_driver_pool.create_driver(user_id)
+        if driver_id is None:
+            raise Exception("Failed to create a new driver.")
+
+        page_driver = page_driver_pool.get_driver(driver_id)
+        page_driver.start_and_enter_lab_manage_handling_except(ID, PW)
+        page_driver.manage_lab_at_range_of_date(lab, start_date, end_date, except_dates)
+        page_driver.log_out()
+
+        with app.app_context():
+            socketio.emit('task_complete', {'status': 'success', 'user_id': user_id})
+    except Exception as e:
+        feedback_logger.error(f"Error in enter_lab_records: {e}")
+        with app.app_context():
+            socketio.emit('task_complete', {'status': 'error', 'user_id': user_id})
+    finally:
+        if driver_id is not None:
+            page_driver_pool.remove_driver(driver_id)
+
+
+@app.route('/in_progress')
+def in_progress():
+    # console_logger = logging.getLogger('console_logger')
+    # console_logger.error(f"userid = {session['user_id']}")
+    return render_template('in_progress.html', user_id=session['user_id'])
+
 
 @app.route('/delete', methods=['POST'])
 def delete_records():
+    if 'user_id' not in session:
+        session['user_id'] = str(uuid.uuid4())
+    user_id = session['user_id']
     try:
         ID = request.form['ID']
         PW = request.form['PW']
@@ -59,50 +104,50 @@ def delete_records():
         end_date = parse_date(request.form['end_date'])
         except_dates_str = request.form['except_dates']
 
-        # 예외 날짜 처리
         except_dates = []
         if except_dates_str:
             except_dates_list = except_dates_str.split(',')
             except_dates = [parse_date(date.strip()) for date in except_dates_list if date.strip()]
 
-        # 입력값 검증
         if not start_date or not end_date:
             flash("Invalid start date or end date.", "error")
             return redirect(url_for('index'))
 
-        logging.info(f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+        threading.Thread(target=delete_lab_records,
+                         args=(ID, PW, lab, start_date, end_date, except_dates, user_id)).start()
 
-        # 비즈니스 로직 실행
-        pd.start_and_enter_lab_manage_handling_except(ID, PW)
-        lm.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
-        return redirect(url_for('delete_success'))
+        return redirect(url_for('in_progress'))
     except Exception as e:
-        logging.error(f"Error in delete_records route: {e}")
-        pd.logout_and_reset_driver()
+        feedback_logger = logging.getLogger('feedback_logger')
+        feedback_logger.error(f"Error in delete_records route: {e}")
         return redirect(url_for('error'))
 
-@app.route('/success')
-def success():
-    pd.log_out()
-    return '''
-    작업이 성공적으로 완료되었습니다!<br>
-    <a href="/"><button>처음으로</button></a>
-    '''
 
-@app.route('/delete_success')
-def delete_success():
-    pd.log_out()
-    return '''
-    삭제 작업이 성공적으로 완료되었습니다!<br>
-    <a href="/"><button>처음으로</button></a>
-    '''
+def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates, user_id):
+    feedback_logger = logging.getLogger('feedback_logger')
+    feedback_logger = logging.LoggerAdapter(feedback_logger, {'user_id': user_id})
+    try:
+        feedback_logger.info(
+            f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
+        driver_id = page_driver_pool.create_driver(user_id)
+        if driver_id is None:
+            raise Exception("Failed to create a new driver.")
 
-@app.route('/error')
-def error():
-    return '''
-    오류가 발생했습니다. 다시 시도해주세요.<br>
-    <a href="/"><button>처음으로</button></a>
-    '''
+        page_driver = page_driver_pool.get_driver(driver_id)
+        page_driver.start_and_enter_lab_manage_handling_except(ID, PW)
+        page_driver.delete_lab_records_at_range_of_date(lab, start_date, end_date, except_dates)
+        page_driver.log_out()
+
+        with app.app_context():
+            socketio.emit('task_complete', {'status': 'success', 'user_id': user_id})
+    except Exception as e:
+        feedback_logger.error(f"Error in delete_lab_records: {e}")
+        with app.app_context():
+            socketio.emit('task_complete', {'status': 'error', 'user_id': user_id})
+    finally:
+        if driver_id is not None:
+            page_driver_pool.remove_driver(driver_id)
+
 
 def parse_date(date_str):
     today = datetime.datetime.today()
@@ -120,8 +165,10 @@ def parse_date(date_str):
         elif date_str.isdigit() and len(date_str) <= 2:
             return datetime.datetime(today.year, today.month, int(date_str)).date()
     except ValueError:
-        logging.error(f"Invalid date format: {date_str}")
+        console_logger = logging.getLogger('console_logger')
+        console_logger.error(f"Invalid date format: {date_str}")
         return None
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
