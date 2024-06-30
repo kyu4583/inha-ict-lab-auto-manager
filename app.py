@@ -129,7 +129,7 @@ def delete_lab_records(ID, PW, lab, start_date, end_date, except_dates, user_id)
     try:
         feedback_logger.info(
             f"Starting record deletion: ID={ID}, Lab={lab}, Start Date={start_date}, End Date={end_date}")
-        driver_id = page_driver_pool.create_driver()
+        driver_id = page_driver_pool.create_driver(user_id)
         if driver_id is None:
             raise Exception("Failed to create a new driver.")
 
